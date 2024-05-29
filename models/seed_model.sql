@@ -6,7 +6,8 @@ MODEL (
   columns (
     id INTEGER,
     item_id INTEGER,
-    event_date DATE
+    event_date DATE,
+    nullz INT
   ),
   grain (id, event_date)
 );
