@@ -1,0 +1,55 @@
+2024-05-28 19:03:53,880 - MainThread - sqlmesh.core.config.connection - INFO - Creating new DuckDB adapter for data files: {'db.db'} (connection.py:294)
+2024-05-28 19:03:53,942 - MainThread - sqlmesh.core.renderer - WARNING - Column '"month"' could not be resolved for model '"db"."splice_case_study"."view_model"', the column may not exist or is ambiguous (renderer.py:506)
+2024-05-28 19:03:54,185 - MainThread - sqlmesh.core.config.connection - INFO - Using existing DuckDB adapter due to overlapping data file: db.db (connection.py:290)
+2024-05-28 19:05:15,125 - MainThread - sqlmesh.core.snapshot.evaluator - INFO - Listing data objects in schema db.sqlmesh__splice_case_study (evaluator.py:266)
+2024-05-28 19:05:15,128 - MainThread - sqlmesh.core.engine_adapter.base - INFO - Executing SQL: SELECT CURRENT_CATALOG() (base.py:1834)
+2024-05-28 19:05:15,129 - MainThread - sqlmesh.core.engine_adapter.base - INFO - Executing SQL: SELECT CURRENT_CATALOG() (base.py:1834)
+2024-05-28 19:05:15,132 - MainThread - sqlmesh.core.engine_adapter.base - INFO - Executing SQL: SELECT table_name AS name, table_schema AS schema, CASE table_type WHEN 'BASE TABLE' THEN 'table' WHEN 'VIEW' THEN 'view' WHEN 'LOCAL TEMPORARY' THEN 'table' END AS type FROM information_schema.tables WHERE table_schema = 'sqlmesh__splice_case_study' AND table_name IN ('splice_case_study__incremental_model__4290955__temp', 'splice_case_study__view_model__3441327179', 'splice_case_study__view_model__3441327179__temp', 'splice_case_study__incremental_model__4290955', 'splice_case_study__seed_model__84995534', 'splice_case_study__seed_model__84995534__temp') (base.py:1834)
+2024-05-28 19:05:15,157 - MainThread - sqlmesh.core.snapshot.evaluator - INFO - Creating schema 'db.sqlmesh__splice_case_study' (evaluator.py:850)
+2024-05-28 19:05:15,157 - MainThread - sqlmesh.core.engine_adapter.base - INFO - Executing SQL: CREATE SCHEMA IF NOT EXISTS "db"."sqlmesh__splice_case_study" (base.py:1834)
+2024-05-28 19:05:15,158 - MainThread - sqlmesh.core.snapshot.evaluator - INFO - Creating view 'db.sqlmesh__splice_case_study.splice_case_study__view_model__3441327179__temp' (evaluator.py:1587)
+2024-05-28 19:05:15,170 - MainThread - sqlmesh.core.renderer - WARNING - Column '"month"' could not be resolved for model '"db"."splice_case_study"."view_model"', the column may not exist or is ambiguous (renderer.py:506)
+2024-05-28 19:05:15,176 - MainThread - sqlmesh.core.engine_adapter.base - INFO - Executing SQL: CREATE OR REPLACE VIEW "db"."sqlmesh__splice_case_study"."splice_case_study__view_model__3441327179__temp" AS WITH "total_customers_by_month" AS (SELECT COUNT(DISTINCT "user_id") AS "customer_count", "month" FROM "db"."sqlmesh__splice_case_study"."splice_case_study__incremental_model__4290955__temp" AS "incremental_model" WHERE "customer_flag" = 1 GROUP BY "month"), "get_previous_months_data" AS (SELECT "user_id", LAG("month") OVER (PARTITION BY "user_id" ORDER BY "month") AS "previous_month", LAG("customer_flag") OVER (PARTITION BY "user_id" ORDER BY "month") AS "previous_customer_flag", "month" AS "current_month", "customer_flag" AS "current_customer_flag" FROM "db"."sqlmesh__splice_case_study"."splice_case_study__incremental_model__4290955__temp" AS "incremental_model"), "customer_churn_count" AS (SELECT COUNT(DISTINCT "user_id") AS "overall_churn", "current_month" FROM "get_previous_months_data" AS "get_previous_months_data" WHERE DATE_DIFF('CURRENT_MONTH', "previous_month", "month") = 1 AND "previous_customer_flag" = 1 AND "current_customer_flag" = 0 GROUP BY "current_month"), "customer_return_count" AS (SELECT COUNT(DISTINCT "user_id") AS "overall_return", "current_month" FROM "get_previous_months_data" AS "get_previous_months_data" WHERE DATE_DIFF('CURRENT_MONTH', "previous_month", "month") = 1 AND "previous_customer_flag" = 0 AND "current_customer_flag" = 1 GROUP BY "current_month") SELECT "sm"."cohort_month" AS "cohort_month", "sm"."month" AS "month", DATE_DIFF('MONTH', "cohort_month", "month") + 1 AS "relative_month_number", "total"."customer_count" AS "overall_customers", "churn"."overall_churn" AS "overall_churn", "return"."overall_return" AS "overall_return" FROM "db"."sqlmesh__splice_case_study"."splice_case_study__incremental_model__4290955__temp" AS "sm" JOIN "total_customers_by_month" AS "total" ON "total"."month" = "sm"."month" JOIN "customer_churn_count" AS "churn" ON "churn"."current_month" = "sm"."month" JOIN "customer_return_count" AS "return" ON "return"."current_month" = "sm"."month" (base.py:1834)
+2024-05-28 19:05:15,190 - MainThread - sqlmesh.core.context - ERROR - Apply Failure: Traceback (most recent call last):
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/utils/concurrency.py", line 227, in sequential_apply_to_dag
+    fn(node)
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/utils/concurrency.py", line 165, in <lambda>
+    lambda s_id: fn(snapshots_by_id[s_id]),
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/snapshot/evaluator.py", line 293, in <lambda>
+    lambda s: self._create_snapshot(
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/snapshot/evaluator.py", line 680, in _create_snapshot
+    evaluation_strategy.create(
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/snapshot/evaluator.py", line 1588, in create
+    self.adapter.create_view(
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/engine_adapter/shared.py", line 260, in internal_wrapper
+    return func(*list_args, **kwargs)
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/engine_adapter/base.py", line 889, in create_view
+    self.execute(
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/engine_adapter/base.py", line 1831, in execute
+    self._execute(sql, **kwargs)
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/engine_adapter/base.py", line 1837, in _execute
+    self.cursor.execute(sql, **kwargs)
+duckdb.duckdb.BinderException: Binder Error: Ambiguous reference to column name "month" (use: "total.month" or "sm.month")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/context.py", line 1172, in apply
+    self._apply(plan, circuit_breaker)
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/context.py", line 1715, in _apply
+    self._scheduler.create_plan_evaluator(self).evaluate(plan, circuit_breaker=circuit_breaker)
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/plan/evaluator.py", line 109, in evaluate
+    self._push(plan, deployability_index_for_creation)
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/plan/evaluator.py", line 199, in _push
+    self.snapshot_evaluator.create(
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/core/snapshot/evaluator.py", line 291, in create
+    concurrent_apply_to_snapshots(
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/utils/concurrency.py", line 163, in concurrent_apply_to_snapshots
+    return concurrent_apply_to_dag(
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/utils/concurrency.py", line 198, in concurrent_apply_to_dag
+    return sequential_apply_to_dag(dag, fn, raise_on_error)
+  File "/Users/alexanderstoner/dev/sqlmesh-prac/.env/lib/python3.9/site-packages/sqlmesh/utils/concurrency.py", line 230, in sequential_apply_to_dag
+    raise NodeExecutionFailedError(node) from ex
+sqlmesh.utils.concurrency.NodeExecutionFailedError: Execution failed for node SnapshotId<"db"."splice_case_study"."view_model": 229194603>
+ (context.py:1180)
+2024-05-28 19:05:15,192 - MainThread - root - INFO - Shutting down the event dispatcher (dispatcher.py:159)
