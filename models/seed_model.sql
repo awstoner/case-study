@@ -1,13 +1,14 @@
 MODEL (
-  name sqlmesh_example.seed_model,
+  name splice_case_study.seed_model,
   kind SEED (
-    path '../seeds/seed_data.csv'
+    path '../seeds/cohort_test_data.csv'
   ),
+  -- No need for additional csv settings (custom delimiters, encoding, etc.) with the sample dataset
   columns (
-    id INTEGER,
-    item_id INTEGER,
-    event_date DATE,
-    nullz INT
+    month DATE,
+    user_id BIGINT,
+    cohort_month DATE,
+    customer_flag INT
   ),
   grain (id, event_date)
 );
