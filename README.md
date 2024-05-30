@@ -1,8 +1,37 @@
-# General Thoughts
+# Splice Case Study
 
-## Naming Conventions and Data Types 
+This is a take-home case study project that uses SQLMesh seeds, models, and tests to determine the total number of active customers, churned customers, and returning customers by [report] month and cohort [first seen subscription] month.
 
-### Source Data Complaints
+## Running this project
+To get up and running with this project:
+
+1. Install SQLMesh using [these instructions.](https://sqlmesh.readthedocs.io/en/stable/quick_start/)
+
+2. Clone this repository.
+
+3. Change into the case-study directory from the command line:
+
+```
+$ cd case-study
+```
+4. Run the models:
+
+```
+$ sqlmesh plan <ENV>
+```
+5. Query the data:
+
+```
+$ sqlmesh fetchdf "SELECT * FROM splice_case_study.full_model LIMIT 10;"
+```
+
+<br>
+
+## General thoughts and grievances
+
+### Naming Conventions and Data Types 
+
+#### Source Data Complaints
 
 1. Column name "month" is vague. The field should be renamed to "report_month" or similar. "month" being a SQL keyword can create confusing syntax in certain SQL statements.
     * e.g: `DATE_DIFF('month', cohort_month, month)`
@@ -37,6 +66,13 @@
 
 <br>
 
+2. There are users registered as inactive in their cohort_month.
+ * e.g: 
+
+| month | user_id | cohort_month | customer_flag |
+| :--: | :--: | :--: | :--: |
+| 2023-06-01 |  809197614891168787 | 2023-06-01   |             0
+
 2. There is an inconsistent tracking of inactive customers in the table. Sometimes an inactive customer will be removed from the table the following month from a customer_flag = 0 record. Other times a customer will be in the table for two inactive months in a row.
     * e.g: This user appears in the table in 2023-12 and 2024-01 despite being inactive two months in a row.
 <br>
@@ -61,3 +97,13 @@
 | 2023-11-01 | 868733413088241 | 2023-09-01   |             0 |
 | 2024-01-01 | 868733413088241 | 2023-09-01   |             1 |
 | 2024-02-01 | 868733413088241 | 2023-09-01   |             1 |
+
+```
+    /\_____/\
+   /  o   o  \
+  ( ==  ^  == )
+   )         (
+  (           )
+ ( (  )   (  ) )
+(__(__)___(__)__) THANKS FOR READING
+```

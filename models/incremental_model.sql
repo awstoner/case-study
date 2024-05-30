@@ -1,3 +1,4 @@
+-- Incremental dataset storing customer account IDs and subscription status by month, from 2023-06-01 onward.
 MODEL (
   name splice_case_study.incremental_model,
   kind INCREMENTAL_BY_TIME_RANGE (
