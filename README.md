@@ -27,7 +27,7 @@ $ sqlmesh fetchdf "SELECT * FROM splice_case_study.full_model LIMIT 10;"
 
 <br>
 
-## General thoughts and grievances
+## General thoughts during the project
 
 ### Naming Conventions and Data Types 
 
@@ -57,7 +57,7 @@ $ sqlmesh fetchdf "SELECT * FROM splice_case_study.full_model LIMIT 10;"
 
 ## Data Quality
 
-1. There are users registered with cohort_month dates in the future from the current reporting month.
+1. There are users registered with cohort_month dates in the future from the current reporting month.  For the sake of this exercise I've categorized these records as bad data and they have been filtered out in the WHERE clause: ```WHERE DATE_DIFF('month', cohort_month, month) >= 0```. In the real world a conversation would be had regarding their significance.
     * e.g:
     
 | month | user_id | cohort_month | customer_flag |
@@ -66,14 +66,14 @@ $ sqlmesh fetchdf "SELECT * FROM splice_case_study.full_model LIMIT 10;"
 
 <br>
 
-2. There are users registered as inactive in their cohort_month.
+2. There are users registered as inactive in their cohort_month. For the sake of this exercise I've categorized these records as bad data and they have been filtered out in the WHERE/AND clause: ```AND NOT (cohort_month = month AND customer_flag = 0)```. In the real world a conversation would be had regarding their significance.
  * e.g: 
 
 | month | user_id | cohort_month | customer_flag |
 | :--: | :--: | :--: | :--: |
 | 2023-06-01 |  809197614891168787 | 2023-06-01   |             0
 
-2. There is an inconsistent tracking of inactive customers in the table. Sometimes an inactive customer will be removed from the table the following month from a customer_flag = 0 record. Other times a customer will be in the table for two inactive months in a row.
+3. There is an inconsistent tracking of inactive customers in the table. Sometimes an inactive customer will be removed from the table the following month from a customer_flag = 0 record. Other times a customer will be in the table for two inactive months in a row.
     * e.g: This user appears in the table in 2023-12 and 2024-01 despite being inactive two months in a row.
 <br>
 
@@ -98,6 +98,13 @@ $ sqlmesh fetchdf "SELECT * FROM splice_case_study.full_model LIMIT 10;"
 | 2024-01-01 | 868733413088241 | 2023-09-01   |             1 |
 | 2024-02-01 | 868733413088241 | 2023-09-01   |             1 |
 
+4. There are users showing as an active customer one month and having no records the following months. Whether this counts as an instance of churn cannot be determined without further conversation with stakeholders.
+ * e.g:
+
+ | month | user_id | cohort_month | customer_flag |
+| :--: | :--: | :--: | :--: |
+| 2023-07-01 | 6848876051328977622 | 2023-07-01   |             1 |
+
 ```
     /\_____/\
    /  o   o  \
@@ -105,5 +112,5 @@ $ sqlmesh fetchdf "SELECT * FROM splice_case_study.full_model LIMIT 10;"
    )         (
   (           )
  ( (  )   (  ) )
-(__(__)___(__)__) THANKS FOR READING
+(__(__)___(__)__) ~THANKS FOR READING~
 ```
